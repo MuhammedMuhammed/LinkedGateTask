@@ -2,6 +2,7 @@
 using DataManager.Seeders;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -14,6 +15,8 @@ namespace LinkedGateTask
     {
         protected void Application_Start()
         {
+            CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
+            CultureInfo.DefaultThreadCurrentCulture =culture;
             new PropertiesSeeder();
             new CategoriesSeeder();
 
