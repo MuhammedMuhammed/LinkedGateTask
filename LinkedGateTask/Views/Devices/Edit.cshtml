@@ -1,0 +1,135 @@
+﻿@model DataManager.Models.Devices
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+
+@using (Html.BeginForm("Edit", "Devices", FormMethod.Post, htmlAttributes: new { id = "editForm" }))
+{
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+        <h4>Devices</h4>
+        <hr />
+        <div class="row">
+            <div class="col">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.ID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Memo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Memo, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Memo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.AcquisitionDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.AcquisitionDate, new { htmlAttributes = new { @class = "form-control", placeholder = "mm/dd/yy" } })
+                        @Html.ValidationMessageFor(model => model.AcquisitionDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CatId, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.CatId,
+                       new SelectList((List<DataManager.Models.DevicesCategory>)ViewBag.Categories, "ID", "Name"),
+                       "Select Category",
+                       new { @class = "form-control", @onchange = "callChangefunc(this.value)" })
+                        @Html.ValidationMessageFor(model => model.CatId, "", new { @class = "text-danger" })
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="col" id="Properties">
+            </div>
+        </div>
+        <input name="propsList" type="hidden" />
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script>
+        function callChangefunc(value) {
+            $.ajax(
+                {
+                    url: `/DevicesProperties/Setup?propId=${value}&deviceId=@Model.ID` ,
+                    type: 'GET',
+                    data: "",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        $("#Properties").html(data);
+                    },
+                    error: function (err) {
+                        alert("error");
+                    }
+                });
+        }
+
+    $(document).ready(() => {
+
+            $('input[type=datetime]').datepicker({
+                dateFormat: "mm/dd/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-60:+0"
+            });
+
+
+        $("#editForm").on("submit", () => {
+            var devId =@Model.ID;
+            var props = $("#Properties input")
+            var propsData = []
+            
+            for (let i = 0; i < props.length;i++) {
+
+                var ele = $(props[i]);
+                var name = ele.attr("name");
+                var propid = name.split('_')[1];
+                var propVal = ele.val();
+
+                @*@{
+                    ModelProperties.Add(new DataManager.ModelsProperties { PropID = (int)ViewData["PropId"], Value = (string)ViewData["PropValue"] });
+                }*@
+                propsData.push({
+                    DeviceID: devId,
+                    PropID: +propid,
+                    Value: propVal
+                })
+
+            }
+            $("input[name=propsList]").val(JSON.stringify(propsData))
+        })
+        var catIdVal = $("#CatId").val()
+        if (catIdVal && catIdVal.trim() != '') {
+            callChangefunc(catIdVal);
+        }
+    })
+</script>
+
+}
