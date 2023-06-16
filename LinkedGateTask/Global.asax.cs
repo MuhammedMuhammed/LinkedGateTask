@@ -17,6 +17,7 @@ namespace LinkedGateTask
         {
             CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
             CultureInfo.DefaultThreadCurrentCulture =culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
             new PropertiesSeeder();
             new CategoriesSeeder();
 
